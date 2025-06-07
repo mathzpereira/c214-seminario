@@ -7,9 +7,12 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine) {
-    contactGroup := router.Group("/contacts")
-    {
-        contactGroup.GET("/", handlers.GetContacts)
-        contactGroup.POST("/", handlers.CreateContact)
-    }
+	contactGroup := router.Group("/contacts")
+	{
+		contactGroup.GET("/", handlers.GetContacts)
+		contactGroup.POST("/", handlers.CreateContact)
+		contactGroup.GET("/:id", handlers.GetContactByID)
+		contactGroup.PUT("/", handlers.UpdateContactById)
+		contactGroup.DELETE("/:id", handlers.DeleteContact)
+	}
 }

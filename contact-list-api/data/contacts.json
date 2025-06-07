@@ -1,8 +1,14 @@
 [
   {
     "id": 1,
-    "name": "Matheus",
+    "name": "Matheus Cruzeirense",
     "email": "mathz@teste.com",
     "phone": "12345"
+  },
+  {
+    "id": 3,
+    "name": "Davi",
+    "email": "davi.rosa@teste.com",
+    "phone": "09876"
   }
 ]
