@@ -4,11 +4,17 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"path/filepath"
+	"runtime"
 
 	"github.com/mathzpereira/c214-seminario/contact-list-api/models"
 )
 
-const dataFile = "data/contacts.json"
+var (
+    _, b, _, _ = runtime.Caller(0)
+    basePath   = filepath.Join(filepath.Dir(b), "..", "data")
+    dataFile   = filepath.Join(basePath, "contacts.json")
+)
 
 func LoadContacts() ([]models.Contact, error) {
     var contacts []models.Contact
