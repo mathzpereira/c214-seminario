@@ -151,3 +151,18 @@ func GetContactsSummary() (ContactSummary, error) {
 	return summary, nil
 }
 
+func SearchContactsByName(name string) ([]models.Contact, error) {
+	contacts, err := storage.LoadContacts()
+	if err != nil {
+		return nil, err
+	}
+
+	var results []models.Contact
+	for _, contact := range contacts {
+		if strings.HasPrefix(strings.ToLower(contact.Name), strings.ToLower(name)) {
+			results = append(results, contact)
+		}
+	}
+
+	return results, nil
+}

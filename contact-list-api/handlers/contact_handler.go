@@ -98,3 +98,19 @@ func GetContactsSummary(c *gin.Context) {
 
 	c.JSON(http.StatusOK, summary)
 }
+
+func SearchContactsByName(c *gin.Context) {
+	query := c.Query("name")
+	if query == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Query parameter 'name' is required"})
+		return
+	}
+
+	contacts, err := services.SearchContactsByName(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, contacts)
+}
