@@ -88,3 +88,13 @@ func DeleteContact(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+
+func GetContactsSummary(c *gin.Context) {
+	summary, err := services.GetContactsSummary()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, summary)
+}

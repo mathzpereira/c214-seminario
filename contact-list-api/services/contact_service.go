@@ -1,9 +1,19 @@
 package services
 
 import (
+	"strings"
+
 	"github.com/mathzpereira/c214-seminario/contact-list-api/models"
 	"github.com/mathzpereira/c214-seminario/contact-list-api/storage"
 )
+
+type ContactSummary struct {
+	Total           int      `json:"total"`
+	WithEmail       int      `json:"with_email"`
+	WithPhone       int      `json:"with_phone"`
+	LastContactName string   `json:"last_contact_name,omitempty"`
+	DuplicatedNames []string `json:"duplicated_names,omitempty"`
+}
 
 func GetAllContacts() ([]models.Contact, error) {
 	return storage.LoadContacts()
@@ -103,3 +113,41 @@ func DeleteContactById(id int) error {
 
 	return nil
 }
+
+func GetContactsSummary() (ContactSummary, error) {
+	contacts, err := storage.LoadContacts()
+	if err != nil {
+		return ContactSummary{}, err
+	}
+
+	summary := ContactSummary{
+		Total:     len(contacts),
+		WithEmail: 0,
+		WithPhone: 0,
+	}
+
+	nameMap := make(map[string]int)
+
+	for _, c := range contacts {
+		if strings.TrimSpace(c.Email) != "" {
+			summary.WithEmail++
+		}
+		if strings.TrimSpace(c.Phone) != "" {
+			summary.WithPhone++
+		}
+		nameMap[strings.ToLower(c.Name)]++
+	}
+
+	if summary.Total > 0 {
+		summary.LastContactName = contacts[len(contacts)-1].Name
+	}
+
+	for name, count := range nameMap {
+		if count > 1 {
+			summary.DuplicatedNames = append(summary.DuplicatedNames, name)
+		}
+	}
+
+	return summary, nil
+}
+
