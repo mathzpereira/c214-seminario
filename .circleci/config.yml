@@ -28,9 +28,10 @@ jobs:
   build-go-executables:
     docker:
       - image: cimg/go:1.24
+    working_directory: ~/project/contact-list-api
     steps:
       - checkout:
-          path: ~/project/contact-list-api
+          path: ~/project
       - restore_cache:
           key: go-mod-{{ checksum "go.sum" }}
       - run:
