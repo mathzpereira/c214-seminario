@@ -1,11 +1,8 @@
-# This config was automatically generated from your source code
-# Stacks detected: artifact:go-executable:,deps:go:contact-list-api
 version: 2.1
 jobs:
   test-go:
-    # Install go modules and run tests
     docker:
-      - image: cimg/go:1.20
+      - image: cimg/go:1.24
     working_directory: ~/project/contact-list-api
     steps:
       - checkout:
@@ -29,12 +26,11 @@ jobs:
       - store_test_results:
           path: junit.xml
   build-go-executables:
-    # Build go executables and store them as artifacts
     docker:
-      - image: cimg/go:1.20
+      - image: cimg/go:1.24
     steps:
       - checkout:
-          path: ~/project
+          path: ~/project/contact-list-api
       - restore_cache:
           key: go-mod-{{ checksum "go.sum" }}
       - run:
@@ -58,11 +54,9 @@ jobs:
           path: ~/artifacts
           destination: executables
   deploy:
-    # This is an example deploy job, not actually used by the workflow
     docker:
       - image: cimg/base:stable
     steps:
-      # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
@@ -73,6 +67,3 @@ workflows:
       - build-go-executables:
           requires:
             - test-go
-    # - deploy:
-    #     requires:
-    #       - build-go-executables
