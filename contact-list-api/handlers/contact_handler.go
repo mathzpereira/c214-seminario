@@ -54,15 +54,21 @@ func GetContactByID(c *gin.Context) {
 
 func UpdateContactById(c *gin.Context) {
 
-	var contact models.Contact
-	if err := c.ShouldBindJSON(&contact); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
-	updatedContact, err := services.UpdateContactById(contact.ID, contact)
+
+	var contact models.Contact
+	if err := c.ShouldBindJSON(&contact); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+	updatedContact, err := services.UpdateContactById(id, contact)
 
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Contato não encontrado"})
+		c.JSON(404, gin.H{"error": "Contact not found"})
 		return
 	}
 

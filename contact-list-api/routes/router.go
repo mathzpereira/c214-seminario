@@ -12,7 +12,7 @@ func SetupRoutes(router *gin.Engine) {
 		contactGroup.GET("/", handlers.GetContacts)
 		contactGroup.POST("/", handlers.CreateContact)
 		contactGroup.GET("/:id", handlers.GetContactByID)
-		contactGroup.PUT("/", handlers.UpdateContactById)
+		contactGroup.PUT("/:id", handlers.UpdateContactById)
 		contactGroup.DELETE("/:id", handlers.DeleteContact)
 	}
 }
