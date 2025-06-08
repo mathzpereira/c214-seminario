@@ -166,3 +166,28 @@ func SearchContactsByName(name string) ([]models.Contact, error) {
 
 	return results, nil
 }
+
+func GetEmailProviders() (map[string]int, error) {
+	contacts, err := storage.LoadContacts()
+	if err != nil {
+		return nil, err
+	}
+
+	providers := make(map[string]int)
+
+	for _, c := range contacts {
+		if strings.TrimSpace(c.Email) == "" {
+			continue
+		}
+
+		parts := strings.Split(c.Email, "@")
+		if len(parts) != 2 {
+			continue
+		}
+
+		domain := strings.ToLower(parts[1])
+		providers[domain]++
+	}
+
+	return providers, nil
+}

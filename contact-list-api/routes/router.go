@@ -16,5 +16,6 @@ func SetupRoutes(router *gin.Engine) {
 		contactGroup.DELETE("/:id", handlers.DeleteContact)
 		contactGroup.GET("/summary", handlers.GetContactsSummary)
 		contactGroup.GET("/search", handlers.SearchContactsByName)
+		contactGroup.GET("/email-providers", handlers.GetEmailProviders)
 	}
 }

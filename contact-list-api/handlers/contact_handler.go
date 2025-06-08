@@ -114,3 +114,13 @@ func SearchContactsByName(c *gin.Context) {
 
 	c.JSON(http.StatusOK, contacts)
 }
+
+func GetEmailProviders(c *gin.Context) {
+	providers, err := services.GetEmailProviders()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, providers)
+}
