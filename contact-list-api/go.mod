@@ -8,6 +8,13 @@ require (
 )
 
 require (
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/spf13/cobra v1.1.3 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/vakenbolt/go-test-report v0.9.3 // indirect
+)
+
+require (
 	bou.ke/monkey v1.0.2
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
