@@ -480,3 +480,41 @@ func TestDeleteContactById_NotFound_ExpectedError(t *testing.T) {
 	assert.EqualError(t, err, expectedError.Error())
 
 }
+
+func TestGetAllContacts_Success(t *testing.T) {
+	// Fixture
+	expectedContacts := []models.Contact{
+		{ID: 1, Name: "Alice", Email: "alice@example.com"},
+		{ID: 2, Name: "Bob", Email: "bob@example.com"},
+	}
+
+	patch := monkey.Patch(storage.LoadContacts, func() ([]models.Contact, error) {
+		return expectedContacts, nil
+	})
+	defer patch.Unpatch()
+
+	// Exercise
+	contacts, err := services.GetAllContacts()
+
+	// Assert
+	assert.NoError(t, err)
+	assert.Equal(t, expectedContacts, contacts)
+}
+
+func TestGetContactsSummary_FileNotFound(t *testing.T) {
+	// Fixture
+	patch := monkey.Patch(storage.LoadContacts, func() ([]models.Contact, error) {
+		return nil, storage.ErrFileNotFound
+	})
+	defer patch.Unpatch()
+
+	// Exercise
+	summary, err := services.GetContactsSummary()
+
+	// Assert
+	assert.Error(t, err)
+	assert.Equal(t, 0, summary.Total)
+	assert.Empty(t, summary.LastContactName)
+	assert.Empty(t, summary.DuplicatedNames)
+	assert.Equal(t, services.ContactSummary{}, summary)
+}

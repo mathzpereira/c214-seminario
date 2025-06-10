@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -15,6 +16,8 @@ var (
 	basePath   = filepath.Join(filepath.Dir(b), "..", "data")
 	dataFile   = filepath.Join(basePath, "contacts.json")
 )
+
+var ErrFileNotFound = errors.New("file not found")
 
 func LoadContacts() ([]models.Contact, error) {
 	var contacts []models.Contact
