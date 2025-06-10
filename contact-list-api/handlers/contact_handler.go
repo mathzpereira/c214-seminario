@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/mathzpereira/c214-seminario/contact-list-api/models"
 	"github.com/mathzpereira/c214-seminario/contact-list-api/services"
@@ -47,12 +48,17 @@ func CreateContact(c *gin.Context) {
 		return
 	}
 
-	if err := services.AddContact(contact); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	addedContact, err := services.AddContact(contact)
+	if err != nil {
+		if strings.Contains(err.Error(), "empty") || strings.Contains(err.Error(), "invalid") {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create contact: " + err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, contact)
+	c.JSON(http.StatusCreated, addedContact)
 }
 
 // GetContactByID godoc
@@ -67,14 +73,14 @@ func GetContactByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		c.JSON(400, gin.H{"error": "ID deve ser número"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID deve ser número"})
 		return
 	}
 
 	contact, err := services.GetContactByID(id)
 
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Contato não encontrado"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Contato não encontrado"})
 		return
 	}
 
@@ -106,14 +112,19 @@ func UpdateContactById(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
+
 	updatedContact, err := services.UpdateContactById(id, contact)
 
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Contact not found"})
+		if strings.Contains(err.Error(), "empty") || strings.Contains(err.Error(), "invalid") {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, updatedContact)
+	c.JSON(http.StatusOK, updatedContact)
 }
 
 // DeleteContact remove um contato por ID
@@ -134,6 +145,7 @@ func DeleteContact(c *gin.Context) {
 
 	if err := services.DeleteContactById(id); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.Status(http.StatusNoContent)
