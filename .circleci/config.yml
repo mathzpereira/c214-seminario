@@ -54,13 +54,6 @@ jobs:
       - store_artifacts:
           path: ~/artifacts
           destination: executables
-  deploy:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - run:
-          name: deploy
-          command: '#e.g. ./deploy.sh'
 workflows:
   build-and-test:
     jobs:
