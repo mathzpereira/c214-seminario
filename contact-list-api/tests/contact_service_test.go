@@ -14,7 +14,7 @@ import (
 func TestGetContactByID_Success_ExpectedValidContact(t *testing.T) {
 	// Fixture
 	expectedContact := models.Contact{
-		ID:    4,
+		ID:    3,
 		Name:  "Carlos Eduardo",
 		Email: "carlos.eduardo@gmail.com",
 		Phone: "551199998877",
