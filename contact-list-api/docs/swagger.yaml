@@ -1,0 +1,238 @@
+basePath: /
+definitions:
+  handlers.HTTPError:
+    properties:
+      error:
+        type: string
+    type: object
+  models.Contact:
+    properties:
+      email:
+        example: joao@email.com
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: João da Silva
+        type: string
+      phone:
+        example: "11999998888"
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API para gerenciamento de lista de contatos
+  title: Contact List API
+  version: "1.0"
+paths:
+  /contacts/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Contact'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.HTTPError'
+      summary: Lista todos os contatos
+      tags:
+      - Contacts
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Contato
+        in: body
+        name: contact
+        required: true
+        schema:
+          $ref: '#/definitions/models.Contact'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Contact'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.HTTPError'
+      summary: Cria um novo contato
+      tags:
+      - Contacts
+  /contacts/{id}:
+    delete:
+      description: Deleta um contato existente usando o ID
+      parameters:
+      - description: ID do contato
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Remove um contato
+      tags:
+      - Contacts
+    get:
+      parameters:
+      - description: ID do contato
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Contact'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.HTTPError'
+      summary: Busca um contato por ID
+      tags:
+      - Contacts
+    put:
+      consumes:
+      - application/json
+      description: Atualiza os dados de um contato existente
+      parameters:
+      - description: ID do contato
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados atualizados do contato
+        in: body
+        name: contact
+        required: true
+        schema:
+          $ref: '#/definitions/models.Contact'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Contact'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Atualiza um contato por ID
+      tags:
+      - Contacts
+  /contacts/email-providers:
+    get:
+      description: Retorna todos os domínios de e-mail utilizados pelos contatos
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Lista provedores de e-mail
+      tags:
+      - Contacts
+  /contacts/search:
+    get:
+      description: Busca contatos com base em parte do nome
+      parameters:
+      - description: Nome para busca parcial
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Contact'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Busca contatos
+      tags:
+      - Contacts
+  /contacts/summary:
+    get:
+      description: Obtém estatísticas ou dados agregados sobre os contatos
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Resumo dos contatos
+      tags:
+      - Contacts
+swagger: "2.0"
