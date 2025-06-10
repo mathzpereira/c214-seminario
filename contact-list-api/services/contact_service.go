@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/mathzpereira/c214-seminario/contact-list-api/models"
@@ -104,7 +105,7 @@ func DeleteContactById(id int) error {
 	}
 
 	if !found {
-		return err
+		return errors.New("contact not found")
 	}
 
 	if err := storage.SaveContacts(updatedContacts); err != nil {

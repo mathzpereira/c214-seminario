@@ -268,3 +268,215 @@ func TestGetContactsSummary_LoadError_ExpectedError(t *testing.T) {
 	assert.Equal(t, services.ContactSummary{}, result)
 	assert.Error(t, err)
 }
+
+func TestSearchContactsByName_Success(t *testing.T) {
+	// Fixture
+	mockContacts := []models.Contact{
+		{ID: 1, Name: "Fernanda Lima", Email: "fernanda.lima@yahoo.com", Phone: "551198765432"},
+		{ID: 2, Name: "Carlos Eduardo", Email: "carlos.eduardo@gmail.com", Phone: "551199998877"},
+		{ID: 3, Name: "Fernando Souza", Email: "fernando.souza@hotmail.com", Phone: "551197654321"},
+		{ID: 4, Name: "Carlos Vinícius", Email: "carlos.vinicius@gmail.com", Phone: ""},
+	}
+
+	expectedResults := []models.Contact{
+		{ID: 1, Name: "Fernanda Lima", Email: "fernanda.lima@yahoo.com", Phone: "551198765432"},
+		{ID: 3, Name: "Fernando Souza", Email: "fernando.souza@hotmail.com", Phone: "551197654321"},
+	}
+
+	patch := monkey.Patch(storage.LoadContacts, func() ([]models.Contact, error) {
+		return mockContacts, nil
+	})
+	defer patch.Unpatch()
+
+	// Exercise
+	results, err := services.SearchContactsByName("Fern")
+
+	// Assert
+	assert.NoError(t, err)
+	assert.Equal(t, expectedResults, results)
+}
+
+func TestSearchContactsByName_NoMatches(t *testing.T) {
+	// Fixture
+	mockContacts := []models.Contact{
+		{ID: 1, Name: "Fernanda Lima", Email: "fernanda.lima@yahoo.com", Phone: "551198765432"},
+		{ID: 2, Name: "Carlos Eduardo", Email: "carlos.eduardo@gmail.com", Phone: "551199998877"},
+	}
+
+	patch := monkey.Patch(storage.LoadContacts, func() ([]models.Contact, error) {
+		return mockContacts, nil
+	})
+	defer patch.Unpatch()
+
+	// Exercise
+	results, err := services.SearchContactsByName("Marcos")
+
+	// Assert
+	assert.NoError(t, err)
+	assert.Empty(t, results)
+}
+
+func TestSearchContactsByName_EmptyName(t *testing.T) {
+	// Fixture
+	mockContacts := []models.Contact{
+		{ID: 1, Name: "Fernanda Lima", Email: "fernanda.lima@yahoo.com", Phone: "551198765432"},
+		{ID: 2, Name: "Carlos Eduardo", Email: "carlos.eduardo@gmail.com", Phone: "551199998877"},
+	}
+
+	patch := monkey.Patch(storage.LoadContacts, func() ([]models.Contact, error) {
+		return mockContacts, nil
+	})
+	defer patch.Unpatch()
+
+	// Exercise
+	results, err := services.SearchContactsByName("")
+
+	// Assert
+	assert.NoError(t, err)
+	assert.Equal(t, mockContacts, results)
+}
+
+func TestGetEmailProviders_Success(t *testing.T) {
+	// Fixture
+	mockContacts := []models.Contact{
+		{ID: 1, Name: "Fernanda Lima", Email: "fernanda.lima@yahoo.com", Phone: "551198765432"},
+		{ID: 2, Name: "Carlos Eduardo", Email: "carlos.eduardo@gmail.com", Phone: "551199998877"},
+		{ID: 3, Name: "Marcos Vinícius", Email: "marcos.vinicius@gmail.com", Phone: ""},
+		{ID: 4, Name: "Juliana Souza", Email: "juliana.souza@hotmail.com", Phone: "551197654321"},
+		{ID: 5, Name: "Ana Silva", Email: "", Phone: "551196543210"},
+	}
+
+	expectedProviders := map[string]int{
+		"yahoo.com":   1,
+		"gmail.com":   2,
+		"hotmail.com": 1,
+	}
+
+	patch := monkey.Patch(storage.LoadContacts, func() ([]models.Contact, error) {
+		return mockContacts, nil
+	})
+	defer patch.Unpatch()
+
+	// Exercise
+	providers, err := services.GetEmailProviders()
+
+	// Assert
+	assert.NoError(t, err)
+	assert.Equal(t, expectedProviders, providers)
+}
+
+func TestGetEmailProviders_EmptyEmails(t *testing.T) {
+	// Fixture
+	mockContacts := []models.Contact{
+		{ID: 1, Name: "Fernanda Lima", Email: "", Phone: "551198765432"},
+		{ID: 2, Name: "Carlos Eduardo", Email: "", Phone: "551199998877"},
+	}
+
+	patch := monkey.Patch(storage.LoadContacts, func() ([]models.Contact, error) {
+		return mockContacts, nil
+	})
+	defer patch.Unpatch()
+
+	// Exercise
+	providers, err := services.GetEmailProviders()
+
+	// Assert
+	assert.NoError(t, err)
+	assert.Empty(t, providers)
+}
+
+func TestGetEmailProviders_StorageError(t *testing.T) {
+	// Fixture
+	expectedError := errors.New("storage error")
+
+	patch := monkey.Patch(storage.LoadContacts, func() ([]models.Contact, error) {
+		return nil, expectedError
+	})
+	defer patch.Unpatch()
+
+	// Exercise
+	providers, err := services.GetEmailProviders()
+
+	// Assert
+	assert.Error(t, err)
+	assert.Nil(t, providers)
+	assert.Equal(t, expectedError, err)
+}
+func TestDeleteContactById_Success(t *testing.T) {
+	// Fixture
+	mockContacts := []models.Contact{
+		{ID: 1, Name: "Fernanda Lima", Email: "fernanda@example.com", Phone: "111111111"},
+		{ID: 2, Name: "Carlos Eduardo", Email: "carlos@example.com", Phone: "222222222"},
+		{ID: 3, Name: "Marcos Vinícius", Email: "marcos@example.com", Phone: "333333333"},
+	}
+
+	patchLoad := monkey.Patch(storage.LoadContacts, func() ([]models.Contact, error) {
+		return mockContacts, nil
+	})
+	defer patchLoad.Unpatch()
+
+	var savedContacts []models.Contact
+	patchSave := monkey.Patch(storage.SaveContacts, func(contacts []models.Contact) error {
+		savedContacts = contacts
+		return nil
+	})
+	defer patchSave.Unpatch()
+
+	// Exercise
+	err := services.DeleteContactById(2)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.Len(t, savedContacts, 2)
+	assert.Equal(t, 1, savedContacts[0].ID)
+	assert.Equal(t, 3, savedContacts[1].ID)
+}
+func TestDeleteContactById_SaveError_ExpectedError(t *testing.T) {
+	// Fixture
+	mockContacts := []models.Contact{
+		{ID: 1, Name: "Fernanda Lima", Email: "fernanda.lima@yahoo.com", Phone: "551198765432"},
+		{ID: 3, Name: "Carlos Eduardo", Email: "carlos.eduardo@gmail.com", Phone: "551199998877"},
+	}
+
+	expectedError := errors.New("failed to delete contact")
+
+	patchLoad := monkey.Patch(storage.LoadContacts, func() ([]models.Contact, error) {
+		return mockContacts, nil
+	})
+	defer patchLoad.Unpatch()
+
+	patchSave := monkey.Patch(storage.SaveContacts, func(contacts []models.Contact) error {
+		return expectedError
+	})
+	defer patchSave.Unpatch()
+
+	// Exercise
+	err := services.DeleteContactById(3)
+
+	// Assert
+	assert.Error(t, err)
+	assert.Equal(t, expectedError, err)
+}
+
+func TestDeleteContactById_NotFound_ExpectedError(t *testing.T) {
+	// Arrange (Fixture)
+	mockContacts := []models.Contact{
+		{ID: 1, Name: "Fernanda Lima", Email: "fernanda@example.com", Phone: "111111111"},
+		{ID: 2, Name: "Carlos Eduardo", Email: "carlos@example.com", Phone: "222222222"},
+	}
+
+	patchLoad := monkey.Patch(storage.LoadContacts, func() ([]models.Contact, error) {
+		return mockContacts, nil
+	})
+	defer patchLoad.Unpatch()
+
+	expectedError := errors.New("contact not found")
+
+	// Act (Exercise)
+	err := services.DeleteContactById(3)
+
+	// Assert
+	assert.Error(t, err)
+	assert.EqualError(t, err, expectedError.Error())
+
+}
